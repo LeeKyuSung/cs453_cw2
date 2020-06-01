@@ -10,9 +10,10 @@ false
 
 
 '''
-from ast import dump
-from unittest.test.testmock.testmock import something
+from ast import dump, parse
+
 import astunparse
+import astor
 
 
 class Node:
@@ -51,15 +52,15 @@ class Node:
                 self.false_child.add_to_end(new_node)
             else:
                 self.false_child = new_node.copy()
-                self.false_child.parent= self
+                self.false_child.parent = self
         
     def add_loop(self, new_node):
         new_node = new_node.copy()
         flag = False
         if hasattr(self, "before"):
             for x in self.before:
-                if dump(x)=="Break()":
-                    #TODO return 같은걸로 loop나가는거도 추가
+                if dump(x) == "Break()":
+                    # TODO return 같은걸로 loop나가는거도 추가
                     print("Break~~~~")
                     flag = True
                 if flag:
@@ -92,8 +93,7 @@ class Node:
                 self.false_child.add_loop(new_node)
             else:
                 self.false_child = new_node.copy()
-                self.false_child.parent= self
-        
+                self.false_child.parent = self
         
     def copy(self):
         new_node = Node()
@@ -110,33 +110,70 @@ class Node:
         
         return new_node
     
+    def getReverseTest(self):
+        return parse("not (" + astunparse.unparse(self.test) + ")").body[0]
+    
     def print_test_case(self, prefix, before_list):
         self.index = Node.index
         Node.index += 1
         
-        before = []
-        before.append(before_list)
+        tmp1 = []
+        tmp2 = []
+        tmp1.extend(before_list)
+        tmp2.extend(before_list)
         if hasattr(self, 'before'):
-            before.append(self.before)
-        if hasattr(self, 'test'):
-            before.append(self.test)
-        
+            tmp1.extend(self.before)
+            tmp2.extend(self.before)
+            
         if hasattr(self, 'type'):
             if hasattr(self, 'true_child'):
-                self.true_child.print_test_case(str(self.index)+"T", before)
-            else :
-                print(str(self.index) + "T: " + "something wrong")
-                # TODO print some case
+                if hasattr(self, 'test'):
+                    tmp1.append(self.test)
+                self.true_child.print_test_case(str(self.index) + "T", tmp1)
             if hasattr(self, "false_child"):
-                self.false_child.print_test_case(str(self.index)+"F", before)
-            else:
-                print(str(self.index) + "F: " + "something wrong")
-                # TODO
+                if hasattr(self, 'test'):
+                    tmp2.append(self.getReverseTest())
+                self.false_child.print_test_case(str(self.index) + "F", tmp2)
         else:
-            print(prefix + ": something wrong")
+            answer = []
+            
+            # in this case, tmp1=tmp2
+            predicates = []
+            assigns = []
+            for x in tmp1:
+                predicate = astunparse.unparse(x).strip()
+                if predicate != '':
+                    if 'Compare' in dump(x):
+                        for y in assigns:
+                            if y.targets[0].id in predicates:
+                                predicate.replace(y.targets[0].id, dump(y.value))
+                        predicates.append(predicate)
+                        
+                    elif type(x) == 'Assign':
+                        assigns.append(x)
+            
+            for x in predicates:
+                print(predicates)
+            
+            answer = [[1], [100001, 100003, 10005], [1]]
+            print(prefix + ": ")
+            
+            flag = True
+            for x in answer[0]:
+                for y in answer[1]:
+                    for z in answer[2]:
+                        flag = True
+                        for predicate in predicates:
+                            if not eval(predicate):
+                                flag = False
+                                break;
+                        if flag:
+                            # success
+                            print(prefix, " : ", x, " ", y, " " , z)
+                            return
+            if not flag:
+                print(prefix , " : -")
             # TODO
-            for x in before:
-                print(astunparse.unparse(x))
     
     def to_string(self):
         ret = "{"
