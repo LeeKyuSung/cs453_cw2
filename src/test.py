@@ -10,6 +10,7 @@ from ast import dump
 from astor import parse_file
 from astor.code_gen import to_source
 from astor.node_util import dump_tree, iter_node
+import astunparse
 
 
 targetFile = "../inputs/sample1.py"
@@ -17,6 +18,8 @@ targetFile = "../inputs/sample1.py"
 ast = parse_file(targetFile)
 
 print(dump(ast))
+
+a = []
 
 body1 = ast.body;
 for x in body1:
@@ -36,8 +39,14 @@ for x in body1:
                 print(y.test.comparators[0].value)
             elif isinstance(y, Assign):
                 print("[Assign]")
+                a.append(y)
         
         decorator_list = x.decorator_list
         returns = x.returns
         type_comment = x.type_comment
 
+
+print(a)
+for x in a:
+    print(dump(x))
+    print(astunparse.unparse(x))

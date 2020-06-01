@@ -18,6 +18,9 @@ def test_me(x, y, z):
         print("6")
         while x < 5:
             print("7")
+            if y==30:
+                break
             x += 1
             z = z + 1
     y = 0
+    

@@ -5,7 +5,7 @@ Created on 2020. 5. 27.
 '''
 
 from _ast import FunctionDef, Assign, If, AnnAssign, AugAssign, For, While, \
-    Return
+    Return, Break
 from ast import dump
 from unittest import case
 
@@ -15,8 +15,9 @@ from astor.node_util import dump_tree, iter_node
 
 from node import Node
 
+
 # 1. 파일 읽기
-targetFile = "../inputs/sample6.py"
+targetFile = "../inputs/sample1.py"
 ast = parse_file(targetFile)
 # print(dump(ast))
 
@@ -56,8 +57,24 @@ def make_node(list):
             node.type = "If"
             node.test = x.test
             node.true_child = make_node(x.body)
+            node.true_child.parent = node
             node.false_child = make_node(x.orelse)
+            node.false_child.parent = node
             break;
+        elif t == While:
+            node.type = "While"
+            node.test = x.test
+            node.true_child = make_node(x.body)
+            node.true_child.parent = node
+            node.false_child = make_node(x.orelse)
+            node.false_child.parent = node
+            
+            #for tmp in range(0,5):
+            node.true_child.add_loop(node.copy())
+            node.true_child.add_loop(node.copy())
+            node.true_child.add_loop(node.copy())
+            
+            break
         else:
             before.append(x)
     
@@ -74,7 +91,9 @@ def make_node(list):
 
 root = make_node(function_def.body)
 
-# 4. 각 노드별로 테스트 케이스 생성
-# 사용 안하는 값은 뭘로 넣지? 일단 랜덤으로 시도해보자
-
 print(root.to_string())
+
+# 4. 각 노드별로 테스트 케이스 생성
+#root.print_test_case("R", [])
+
+

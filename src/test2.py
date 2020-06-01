@@ -1,8 +1,6 @@
-a = [1, 2]
-a.append(4)
-print(a)
-print(a[0])
+tmp = "(1<2)"
 
-a = []
-a.append(1)
-print(a)
+print(eval(tmp))
+
+x=5
+exec("print(x)")
