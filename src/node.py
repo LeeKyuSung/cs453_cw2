@@ -156,7 +156,7 @@ class Node:
                 print(predicates)
             
             answer = [[1], [100001, 100003, 10005], [1]]
-            print(prefix + ": ")
+            print(prefix + ": "),
             
             flag = True
             for x in answer[0]:
