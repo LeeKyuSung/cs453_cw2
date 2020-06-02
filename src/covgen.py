@@ -16,14 +16,11 @@ from astor.node_util import dump_tree, iter_node
 from node import Node
 
 def find_test_case(function_def):
-    # TODO argument 체크
-    print(dump(body[0].args.args[0]))
-    print(dump(body))
-    if is_test_able:
-        print("is_test_able : True")
-    else:
-        print("is_test_able : False")
-        exit()
+    
+    #2. args 정리
+    args = function_def.args.args
+    for x in args:
+        print(dump(x))
     
     
     # 3. 테스트 할 function 분석해서 tree로 바꾸고, root 저장
