@@ -1,19 +1,6 @@
-''''
-
-조건문
-true
-    - child node
-    - assign list
-false
-    - child node
-    - assign list
-
-
-'''
 from ast import dump, parse
 
 import astunparse
-import astor
 
 
 class Node:
@@ -113,34 +100,34 @@ class Node:
     def getReverseTest(self):
         return parse("not (" + astunparse.unparse(self.test) + ")").body[0]
     
-    def print_test_case(self, prefix, before_list):
+    def print_test_case(self, prefix, before_list, args):
         self.index = Node.index
         Node.index += 1
         
-        tmp1 = []
-        tmp2 = []
-        tmp1.extend(before_list)
-        tmp2.extend(before_list)
+        before_list_true = []
+        before_list_false = []
+        before_list_true.extend(before_list)
+        before_list_false.extend(before_list)
         if hasattr(self, 'before'):
-            tmp1.extend(self.before)
-            tmp2.extend(self.before)
+            before_list_true.extend(self.before)
+            before_list_false.extend(self.before)
             
         if hasattr(self, 'type'):
             if hasattr(self, 'true_child'):
                 if hasattr(self, 'test'):
-                    tmp1.append(self.test)
-                self.true_child.print_test_case(str(self.index) + "T", tmp1)
+                    before_list_true.append(self.test)
+                self.true_child.print_test_case(str(self.index) + "T", before_list_true, args)
             if hasattr(self, "false_child"):
                 if hasattr(self, 'test'):
-                    tmp2.append(self.getReverseTest())
-                self.false_child.print_test_case(str(self.index) + "F", tmp2)
+                    before_list_false.append(self.getReverseTest())
+                self.false_child.print_test_case(str(self.index) + "F", before_list_false, args)
         else:
             answer = []
             
-            # in this case, tmp1=tmp2
+            # in this case, before_list_true=before_list_false
             predicates = []
             assigns = []
-            for x in tmp1:
+            for x in before_list_true:
                 predicate = astunparse.unparse(x).strip()
                 if predicate != '':
                     if 'Compare' in dump(x):
@@ -148,7 +135,6 @@ class Node:
                             if y.targets[0].id in predicates:
                                 predicate.replace(y.targets[0].id, dump(y.value))
                         predicates.append(predicate)
-                        
                     elif type(x) == 'Assign':
                         assigns.append(x)
             
@@ -176,6 +162,7 @@ class Node:
             # TODO
     
     def to_string(self):
+        # for logging
         ret = "{"
         if hasattr(self, 'type'):
             ret += "\"type\":\"" + self.type + "\","
