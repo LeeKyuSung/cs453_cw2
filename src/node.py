@@ -2,6 +2,8 @@ from ast import dump, parse
 
 import astunparse
 
+from random_gen import RandomGen
+
 
 class Node:
     index = 1
@@ -56,7 +58,7 @@ class Node:
             return
         
         if not hasattr(self, "type"):
-            print("added to existing")
+            #print("added to existing")
             if hasattr(new_node, "before"):
                 self.before.extend(new_node.before)
             if hasattr(new_node, "type"):
@@ -70,7 +72,7 @@ class Node:
                 self.false_child = new_node.false_child
                 self.false_child.parent = self
         else:
-            print("add new")
+            #print("add new")
             if hasattr(self, "true_child"):
                 self.true_child.add_loop(new_node)
             else:
@@ -122,44 +124,24 @@ class Node:
                     before_list_false.append(self.getReverseTest())
                 self.false_child.print_test_case(str(self.index) + "F", before_list_false, args)
         else:
-            answer = []
-            
-            # in this case, before_list_true=before_list_false
+            # in this case, before_list_true=before_list_false            
             predicates = []
-            assigns = []
             for x in before_list_true:
-                predicate = astunparse.unparse(x).strip()
-                if predicate != '':
-                    if 'Compare' in dump(x):
-                        for y in assigns:
-                            if y.targets[0].id in predicates:
-                                predicate.replace(y.targets[0].id, dump(y.value))
+                if 'Compare' in dump(x):
+                    predicate = astunparse.unparse(x).strip()
+                    if predicate !='':
                         predicates.append(predicate)
-                    elif type(x) == 'Assign':
-                        assigns.append(x)
             
-            for x in predicates:
-                print(predicates)
+            answer = RandomGen.generate_answer(predicates, args)
             
-            answer = [[1], [100001, 100003, 10005], [1]]
-            print(prefix + ": "),
+            if len(answer) == 0:
+                print(prefix, " : -")
+            else:
+                print(prefix, " : ", end='')
+                for x in answer:
+                    print(x, " ", end=''),
+                print()
             
-            flag = True
-            for x in answer[0]:
-                for y in answer[1]:
-                    for z in answer[2]:
-                        flag = True
-                        for predicate in predicates:
-                            if not eval(predicate):
-                                flag = False
-                                break;
-                        if flag:
-                            # success
-                            print(prefix, " : ", x, " ", y, " " , z)
-                            return
-            if not flag:
-                print(prefix , " : -")
-            # TODO
     
     def to_string(self):
         # for logging
