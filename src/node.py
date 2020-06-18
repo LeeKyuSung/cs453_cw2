@@ -1,9 +1,7 @@
+from _ast import If, While
 from ast import dump, parse
-
 import astunparse
-
 from random_gen import RandomGen
-
 
 class Node:
     index = 1
@@ -58,7 +56,7 @@ class Node:
             return
         
         if not hasattr(self, "type"):
-            #print("added to existing")
+            # print("added to existing")
             if hasattr(new_node, "before"):
                 self.before.extend(new_node.before)
             if hasattr(new_node, "type"):
@@ -72,7 +70,7 @@ class Node:
                 self.false_child = new_node.false_child
                 self.false_child.parent = self
         else:
-            #print("add new")
+            # print("add new")
             if hasattr(self, "true_child"):
                 self.true_child.add_loop(new_node)
             else:
@@ -129,7 +127,7 @@ class Node:
             for x in before_list_true:
                 if 'Compare' in dump(x):
                     predicate = astunparse.unparse(x).strip()
-                    if predicate !='':
+                    if predicate != '':
                         predicates.append(predicate)
             
             answer = RandomGen.generate_answer(predicates, args)
@@ -141,7 +139,6 @@ class Node:
                 for x in answer:
                     print(x, " ", end=''),
                 print()
-            
     
     def to_string(self):
         # for logging
@@ -161,3 +158,45 @@ class Node:
             ret += "\"false\":" + self.false_child.to_string() + ","
         
         return ret + "}"
+    
+    @staticmethod
+    def make_node(list):
+        node = Node()
+        before = []
+        
+        index = -1
+        for x in list:
+            index += 1
+            t = type(x)
+            if t == If:
+                node.type = "If"
+                node.test = x.test
+                node.true_child = Node.make_node(x.body)
+                node.true_child.parent = node
+                node.false_child = Node.make_node(x.orelse)
+                node.false_child.parent = node
+                break;
+            elif t == While:
+                node.type = "While"
+                node.test = x.test
+                node.true_child = Node.make_node(x.body)
+                node.true_child.parent = node
+                node.false_child = Node.make_node(x.orelse)
+                node.false_child.parent = node
+                
+                for tmp in range(0, 5):
+                    node.true_child.add_loop(node)
+                
+                break
+            else:
+                before.append(x)
+        
+        new_list = []
+        if len(list) != 0 and index + 1 != len(list):
+            for i in range(index + 1, len(list)):
+                new_list.append(list[i])
+            node.add_to_end(Node.make_node(new_list))
+        
+        node.before = before
+        
+        return node
