@@ -25,9 +25,7 @@ class RandomGen:
             success = True
             for predicate in predicates:
                 if not eval(predicate):
-                    flag = False
+                    success = False
                     break
             if success:
                 return trying
-            else:
-                return []
