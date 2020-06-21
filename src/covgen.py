@@ -16,7 +16,7 @@ def find_test_case(function_def):
     root.print_test_case("R", [], args)
 
 # 파일 읽기
-targetFile = "../inputs/sample1.py"
+targetFile = "../inputs/sample7.py"
 ast = parse_file(targetFile)
 
 # function마다 테스트케이스 찾기
