@@ -1,7 +1,11 @@
-from _ast import If, While
+from _ast import If, While, For
 from ast import dump, parse
+
 import astunparse
+
+from improved_gen import ImprovedGen
 from random_gen import RandomGen
+
 
 class Node:
     index = 1
@@ -42,9 +46,6 @@ class Node:
                 self.false_child.parent = self
         
     def add_loop(self, num, new_node):
-        print("KYUSUNGLOG ", num)
-        print(new_node.to_string())
-        
         # break 있는지 체크
         flag = False
         if hasattr(self, "before"):
@@ -54,11 +55,9 @@ class Node:
                 if dump(x) == "Break()":
                     flag = True
         if flag:
-            print("3333")
             return
         
         if not hasattr(self, "type"):
-            print("4444")
             new_node = new_node.copy()
             if hasattr(new_node, "type"):
                 self.type = new_node.type
@@ -74,11 +73,9 @@ class Node:
                 self.false_child.parent = self
         else:
             if hasattr(self, "true_child"):
-                print("111111111")
                 if num>1:
                     self.true_child.add_loop(num-1, new_node)
             else:
-                print("222222222")
                 self.true_child = new_node.copy()
                 self.true_child.parent = self
                 if num>1:
@@ -140,7 +137,7 @@ class Node:
                     if predicate != '':
                         predicates.append(predicate)
             
-            answer = RandomGen.generate_answer(predicates, args)
+            answer = ImprovedGen.generate_answer(predicates, args)
             
             print(predicates)
             if len(answer) == 0:
@@ -197,6 +194,8 @@ class Node:
                 
                 node.true_child.add_loop(5, node)
                 break
+            elif t == For:
+                continue
             else:
                 before.append(x)
         
