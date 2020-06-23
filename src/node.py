@@ -139,7 +139,6 @@ class Node:
             
             answer = ImprovedGen.generate_answer(predicates, args)
             
-            print(predicates)
             if len(answer) == 0:
                 print(prefix, " : -")
             else:

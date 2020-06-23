@@ -1,3 +1,20 @@
+def function1(a):
+    print(3)
+
+def function2(a):
+    if a>3:
+        print(1)
+    elif a==5:
+        print(2)
+    else:
+        print(3)
+
+def function3(a):
+    while(a>5):
+        a+=1
+        print(3)
+
+
 def test_me(x, y, z):
     if y > 13:
         print("1")
